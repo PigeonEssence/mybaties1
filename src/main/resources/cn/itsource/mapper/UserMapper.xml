@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <!-- 
+ 	namespace: 名称空间
+ 			 : 指定具体的映射文件		
+ -->
+<mapper namespace="cn.itsource.mapper.UserMapper">
+	
+	<!-- 
+		查询语句
+		id：唯一标识
+		parameterType: 参数类型（可以不写，一般都不写）
+		resultType：结果类型
+	 -->
+<!--	<select id="selectById" resultType="cn.itsource.domain.User">
+		select id,name,password from User where id = #{id}
+	</select>-->
+
+	<!--resultMap id="userResultMap" id需要和下面select resultMap裏面的一樣，大type是user，包含dept-->
+
+<resultMap id="userResultMap" type="cn.itsource.domain.User">
+	<!--id的映射，把sql結果的id列的值賦值給user的id屬性-->
+	<!--part1-->
+	<id column="id" property="id"/>
+	<result column="name" property="name"/>
+	<result column="password" property="password"/>
+	<!--part2-->
+	<!--查詢一個關聯對象,dept對象包在user對象裏面-->
+	<association property="dept" javaType="cn.itsource.domain.Dept">
+		<id column="d_id" property="id"/>
+		<result column="d_name" property="name"/>
+	</association>
+</resultMap>
+
+	<!--聯表查詢語句-->
+	<select id="selectById" resultMap="userResultMap">
+		select
+		       u.id,
+		       u.name,
+		       u.password,
+		       u.dept_id,
+				/*上面的數據映射到part1*/
+		       /*數據一樣的用別名區分*/
+		       d.id as d_id,
+		       d.name as d_name
+				/*上面的數據映射到part2*/
+		from User u join dept d on u.dept_id = d.id
+		where u.id = #{id}
+	</select>
+	
+<!--	先查表1，再查表2-->
+	<resultMap id="userResultMap1" type="cn.itsource.domain.User">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="password" property="password"/>
+
+		<association property="dept"
+					 javaType="cn.itsource.domain.Dept"
+					 select="cn.itsource.mapper.DeptMapper.selectById"
+					 column="dept_id">
+
+		</association>
+	</resultMap>
+	
+	<select id="selectById2" resultMap="userResultMap1">
+	select
+	       id,
+	       name,
+	       password,
+		   dept_id
+	from user where id=#{id}
+
+	</select>
+	<!--
+            批量删除语句
+            id：唯一标识
+            parameterType: 参数类型（可以不写，一般都不写）
+            resultType：结果类型
+            collection：默认用list接受
+            item：循环的每一个元素
+            separator：分隔符
+            open：开始的符号
+            close：结束的符号
+
+            <foreach collection="list" item="id" separator="," open="(" close=")">
+			 #{id}
+		 	</foreach>
+            就会拼接成：（#{id}，#{id}，#{id}）
+         -->
+
+
+	<select id="deleByIds">
+		DELETE from user where id in
+		 <foreach collection="idList" item="id" separator="," open="(" close=")">
+			 #{id}
+		 </foreach>
+	</select>
+
+	<!--
+            批量增加语句
+            id：唯一标识
+            parameterType: 参数类型（可以不写，一般都不写）
+            resultType：结果类型
+            collection：默认用list接受
+            item：循环的每一个元素
+            separator：分隔符
+
+            <foreach collection="userList" item="user" separator=",">
+				(#{user.name},#{user.password})
+			</foreach>
+            就会拼接成：（#{username}，#{password}）,（#{username}，#{password}）,（#{username}，#{password}）
+         -->
+
+
+	<select id="insertUsers">
+		insert into user (name,password) values
+		<foreach collection="userList" item="user" separator=",">
+			(#{user.name},#{user.password})
+		</foreach>
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into user (name,password,dept_id) values (#{name},#{password},#{dept.id})
+	</insert>
+
+	<update id="updateById">
+		update user set name =#{name},
+		                password = #{password},
+		                dept_id = #{dept.id}
+		where id=#{id}
+	</update>
+</mapper>

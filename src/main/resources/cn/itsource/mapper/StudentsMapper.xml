@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <!-- 
+ 	namespace: 名称空间
+ 			 : 指定具体的映射文件		
+ -->
+<mapper namespace="cn.itsource.mapper.StudnetsMapper">
+	
+	<!-- 
+		查询语句
+		id：唯一标识
+		parameterType: 参数类型（可以不写，一般都不写）
+		resultType：结果类型
+	 -->
+<!--	<select id="selectById" resultType="cn.itsource.domain.User">
+		select id,name,password from User where id = #{id}
+	</select>-->
+<resultMap id="studentsResultMap" type="cn.itsource.domain.Students">
+	<!--id的映射，把sql結果的id列的值賦值給user的id屬性-->
+	<id column="id" property="id"/>
+	<result column="name" property="name"/>
+
+	<!--查詢一個關聯對象,dept對象包在user對象裏面-->
+	<association property="classes" javaType="cn.itsource.domain.Classes">
+		<id column="c_id" property="class_id"/>
+		<result column="c_name" property="class_name"/>
+	</association>
+</resultMap>
+
+
+	<select id="selectById" resultMap="studentsResultMap">
+		select
+		       s.id,
+		       s.name,
+		       s.class_id,
+
+		       c.class_id as c_id,
+		       c.class_name as c_name
+		from Students s join Classes c on  s.class_id = c.class_id
+		where s.id = #{id}
+	</select>
+</mapper>

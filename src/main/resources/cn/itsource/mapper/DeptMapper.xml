@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <!-- 
+ 	namespace: 名称空间
+ 			 : 指定具体的映射文件		
+ -->
+<mapper namespace="cn.itsource.mapper.DeptMapper">
+	
+	<!-- 
+		查询语句
+		id：唯一标识
+		parameterType: 参数类型（可以不写，一般都不写）
+		resultType：结果类型
+	 -->
+	<select id="selectById" resultType="cn.itsource.domain.Dept">
+		select * from Dept where id = #{id}
+	</select>
+	<!--
+		useGeneratedKeys="true"
+		keyColumn="id"
+		keyProperty="id"
+		把id自動設置給當前參數對象
+		自動設置id
+	-->
+	<insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into dept(name) values (#(name));
+	</insert>
+
+
+
+</mapper>
